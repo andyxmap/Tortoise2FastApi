@@ -23,14 +23,6 @@ class AppBasedModel(FastAPI):
             self.include_router(router)
 
 
-class Router:
-    def db_for_read(self, model: Type[Model]):
-        return "slave"
-
-    def db_for_write(self, model: Type[Model]):
-        return "master"
-
-
 app = AppBasedModel()
 app.configure()
 

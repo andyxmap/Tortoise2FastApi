@@ -50,8 +50,6 @@ def build_router() -> APIRouter:
     return router
 
 
-
-
 class RouterBasedModel:
 
     model = None
@@ -93,7 +91,7 @@ class RouterBasedModel:
             return await crud.get_by_id(model_id)
 
         @self.router.post(self.endpoints.pop(0), responses=self.responses)
-        async def create(body_model: pydantic_model_no_id):
+        async def create(body_model:  pydantic_model):
             return await crud.create(body_model)
 
         @self.router.put(self.endpoints.pop(0), responses=self.responses)

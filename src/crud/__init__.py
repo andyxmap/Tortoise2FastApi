@@ -1,2 +1,2 @@
-from .user import user
+from .developer import developer
 from .base import CRUD
