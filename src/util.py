@@ -2,14 +2,13 @@ import importlib
 import os
 import warnings
 from inspect import isclass
-from os.path import curdir
 from typing import List, Optional, Any
 from tortoise import Tortoise
 from fastapi import Path
 from typing import Type
 from src.models.base import Base
 
-ROOT_DIR = os.path.dirname(os.path.abspath(curdir))
+ROOT_DIR = os.path.dirname(os.path.abspath(os.getcwd()))
 
 
 def tortoise_models():
@@ -43,7 +42,9 @@ def __remove_das(s: str):
 def parse2module(p: str):
     f = []
     ext = '.py'
-    for root, dirs, files in os.walk(os.path.join(ROOT_DIR, p)):
+    root_dir = os.path.dirname(os.path.abspath(os.getcwd()))
+    walk = root_dir if root_dir.endswith(p) else os.path.join(root_dir, p)
+    for root, dirs, files in os.walk(walk):
         for i in files:
             if not i.endswith(ext) or i.endswith("__init__.py"):
                 continue
@@ -83,7 +84,6 @@ def loader(p: str, base_type, alert=False, exclude: List[str] = []):
         classes.extend(discover_base(m, base_type, alert, exclude))
 
     return set(classes)
-
 
 
 

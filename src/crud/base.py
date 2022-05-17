@@ -1,4 +1,7 @@
 from typing import TypeVar, Generic, Type, List
+
+from tortoise.exceptions import ValidationError
+
 from src.models import base
 from tortoise.contrib.pydantic import PydanticModel
 
@@ -34,6 +37,12 @@ class CRUD(Generic[TortoiseModelType, TortoiseResponsePydantic, TortoiseCreateSc
     async def deleted(self, model_id: int) -> TortoiseResponsePydantic:
         deleted_obj = await self.model.filter(id=model_id).delete()
         return deleted_obj
+
+    async def validate(self, obj: TortoiseUpdateSchemaPydantic):
+        try:
+            return await self.model(**obj.dict())
+        except ValidationError as e:
+            return e.__str__()
 
 
 base = CRUD(base.Base)

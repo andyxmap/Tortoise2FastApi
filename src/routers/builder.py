@@ -1,10 +1,10 @@
 from fastapi import HTTPException, Depends
+from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 from tortoise.contrib.fastapi import HTTPNotFoundError
 from typing import Type, List, Optional
 
 from tortoise.contrib.pydantic import PydanticModel
-
 from src.models.base import Base
 from src.util import get_model, get_pydantic_model
 from src.crud import CRUD
@@ -50,6 +50,8 @@ def build_router() -> APIRouter:
     return router
 
 
+
+
 class RouterBasedModel:
 
     model = None
@@ -60,6 +62,7 @@ class RouterBasedModel:
 
         self.model = model
         self.model_name = model.__name__.lower()
+        self.pydantic_model = model.to_pidantic()
 
         self.endpoints = [
             f"/{self.model_name}/",
@@ -68,6 +71,7 @@ class RouterBasedModel:
             "/{0}/create".format(self.model_name, "{model_id}"),
             "/{0}/update/{1}".format(self.model_name, "{model_id}"),
             "/{0}/delete/{1}".format(self.model_name, "{model_id}"),
+            "/{0}/validate".format(self.model_name)
         ]
 
     def build_crud_router(self) -> Type[APIRouter]:
@@ -89,7 +93,7 @@ class RouterBasedModel:
             return await crud.get_by_id(model_id)
 
         @self.router.post(self.endpoints.pop(0), responses=self.responses)
-        async def create(body_model: pydantic_model):
+        async def create(body_model: pydantic_model_no_id):
             return await crud.create(body_model)
 
         @self.router.put(self.endpoints.pop(0), responses=self.responses)
@@ -103,5 +107,15 @@ class RouterBasedModel:
                 raise HTTPException(status_code=404, detail=f"Object {self.model.__name__} by id= {model_id} not found ")
             return deleted_obj
 
+        @self.router.post(self.endpoints.pop(0))
+        async def validate(obj: pydantic_model):
+            r = await crud.validate(obj)
+            if isinstance(r, str):
+                return JSONResponse(content=r, status_code=422)
+
+            return "ok"
+
         return self.router
+
+
 
