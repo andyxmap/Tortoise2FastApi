@@ -27,6 +27,7 @@ The core module will be in charge of dynamically loading and creating the endpoi
 class AppBasedModel(FastAPI):
 
     def configure(self, exclude: List[str] = ["Base"]):
+        Tortoise.init_models(parse2module("src"), app_label) # for init models for use pydantic relation
         models = loader("src", Base, exclude=exclude)  # dynamic load
         for m in models:
             router = RouterBasedModel(m).build_crud_router()  # construct router based model
