@@ -1,4 +1,4 @@
-# fastapicrud
+
 
 Auto api crud based on tortoise models. Add dynamic classes import and parsed file location to py modules
 
